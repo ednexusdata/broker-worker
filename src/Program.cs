@@ -3,6 +3,7 @@ using OregonNexus.Broker.Data;
 using OregonNexus.Broker.SharedKernel;
 using OregonNexus.Broker.Worker;
 using OregonNexus.Broker.Worker.Services;
+using OregonNexus.Broker.Service;
 
 var builder = Host.CreateDefaultBuilder(args);
 
@@ -28,6 +29,8 @@ builder.ConfigureServices((hostContext, services) =>
     services.AddSingleton(typeof(IMemoryCache), typeof(MemoryCache));
 
     services.AddSingleton<ICurrentUser, CurrentUserService>();
+
+    services.AddBrokerServicesForWorker();
 
     services.AddHostedService<Worker>();
 });

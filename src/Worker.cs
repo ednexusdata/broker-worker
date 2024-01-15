@@ -1,17 +1,20 @@
 using OregonNexus.Broker.SharedKernel;
 using OregonNexus.Broker.Domain;
 using OregonNexus.Broker.Domain.Specifications;
+using OregonNexus.Broker.Service.Resolvers;
 
 namespace OregonNexus.Broker.Worker;
 
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
+    private readonly WorkerResolver _workerResolver;
     private readonly IRepository<Request> _requestsRepository;
 
-    public Worker(ILogger<Worker> logger, IRepository<Request> requestsRepository)
+    public Worker(ILogger<Worker> logger, WorkerResolver workerResolver, IRepository<Request> requestsRepository)
     {
         _logger = logger;
+        _workerResolver = workerResolver;
         _requestsRepository = requestsRepository;
     }
 
@@ -21,16 +24,18 @@ public class Worker : BackgroundService
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
             
-            var requests = await _requestsRepository.FirstOrDefaultAsync(new RequestsReadyForProcessing());
+            var request = await _requestsRepository.FirstOrDefaultAsync(new RequestsReadyForProcessing());
 
-            if (requests is not null)
+            if (request is not null)
             {
-                requests.ProcessState = "Begin Processing";
-                requests.WorkerInstance = Environment.MachineName;
+                request.ProcessState = "Begin Processing";
+                request.WorkerInstance = Environment.MachineName;
 
-                await _requestsRepository.UpdateAsync(requests);
+                await _requestsRepository.UpdateAsync(request);
 
-                _logger.LogInformation("{requestId} request waiting to process.", requests?.Id);
+                _logger.LogInformation("{requestId} is processing.", request.Id);
+
+                await _workerResolver.ResolveAsync(request.Id);
             }
             
             await Task.Delay(1000, stoppingToken);
