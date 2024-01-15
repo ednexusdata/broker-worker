@@ -35,7 +35,7 @@ public class Worker : BackgroundService
 
                 _logger.LogInformation("{requestId} is processing.", request.Id);
 
-                await _workerResolver.ResolveAsync(request.Id);
+                await _workerResolver.ProcessAsync(request);
             }
             
             await Task.Delay(1000, stoppingToken);
