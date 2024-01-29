@@ -28,7 +28,30 @@ builder.ConfigureServices((hostContext, services) =>
 
     services.AddSingleton(typeof(IMemoryCache), typeof(MemoryCache));
 
-    services.AddSingleton<ICurrentUser, CurrentUserService>();
+    if (hostContext.Configuration["WorkerUserStamp"] is not null)
+    {
+        var current = new CurrentUserService(hostContext.Configuration["WorkerUserStamp"]!);
+        services.AddSingleton<ICurrentUser>(current);
+    }
+    else
+    {
+        services.AddSingleton<ICurrentUser, CurrentUserService>();
+    }
+    
+    
+    if (hostContext.HostingEnvironment.IsDevelopment())
+    {
+        services.AddHttpClient("IgnoreSSL").ConfigurePrimaryHttpMessageHandler(() => {
+            var httpClientHandler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
+                {
+                    return true;
+                }
+            };
+            return httpClientHandler;
+        });
+    }
 
     services.AddBrokerServicesForWorker();
 

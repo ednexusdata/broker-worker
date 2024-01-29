@@ -22,8 +22,9 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-            
+            //_logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+            await Task.Delay(1000, stoppingToken);
+
             var request = await _requestsRepository.FirstOrDefaultAsync(new RequestsReadyForProcessing());
 
             if (request is not null)
@@ -37,8 +38,7 @@ public class Worker : BackgroundService
 
                 await _workerResolver.ProcessAsync(request);
             }
-            
-            await Task.Delay(1000, stoppingToken);
+
         }
     }
 }
