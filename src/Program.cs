@@ -12,19 +12,19 @@ builder.ConfigureServices((hostContext, services) =>
     switch (hostContext.Configuration["DatabaseProvider"])
     {
         case DbProviderType.MsSql:
-            services.AddSingleton<BrokerDbContext, MsSqlDbContext>();
+            services.AddDbContext<BrokerDbContext, MsSqlDbContext>();
             break;
 
         case DbProviderType.PostgreSql:
-            services.AddSingleton<BrokerDbContext, PostgresDbContext>();
+            services.AddDbContext<BrokerDbContext, PostgresDbContext>();
             break;
     }
 
-    services.AddSingleton(typeof(EfRepository<>));
-    services.AddSingleton(typeof(CachedRepository<>));
+    services.AddScoped(typeof(EfRepository<>));
+    services.AddScoped(typeof(CachedRepository<>));
 
-    services.AddSingleton(typeof(IRepository<>), typeof(EfRepository<>));
-    services.AddSingleton(typeof(IReadRepository<>), typeof(CachedRepository<>));
+    services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+    services.AddScoped(typeof(IReadRepository<>), typeof(CachedRepository<>));
 
     services.AddSingleton(typeof(IMemoryCache), typeof(MemoryCache));
 

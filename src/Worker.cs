@@ -8,14 +8,12 @@ namespace OregonNexus.Broker.Worker;
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
-    private readonly WorkerResolver _workerResolver;
-    private readonly IRepository<Request> _requestsRepository;
+    private readonly IServiceProvider _serviceProvider;
 
-    public Worker(ILogger<Worker> logger, WorkerResolver workerResolver, IRepository<Request> requestsRepository)
+    public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider)
     {
         _logger = logger;
-        _workerResolver = workerResolver;
-        _requestsRepository = requestsRepository;
+        _serviceProvider = serviceProvider;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -25,18 +23,28 @@ public class Worker : BackgroundService
             //_logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
             await Task.Delay(1000, stoppingToken);
 
-            var request = await _requestsRepository.FirstOrDefaultAsync(new RequestsReadyForProcessing());
-
-            if (request is not null)
+            using (var scoped = _serviceProvider.CreateScope())
             {
-                request.ProcessState = "Begin Processing";
-                request.WorkerInstance = Environment.MachineName;
+                //_logger.LogInformation("Start scope.");
+                var _requestsRepository = (IRepository<Request>)scoped.ServiceProvider.GetService(typeof(IRepository<Request>))!;
+                var _workerResolver = (WorkerResolver)scoped.ServiceProvider.GetService(typeof(WorkerResolver))!;
 
-                await _requestsRepository.UpdateAsync(request);
+                var request = await _requestsRepository.FirstOrDefaultAsync(new RequestsReadyForProcessing());
 
-                _logger.LogInformation("{requestId} is processing.", request.Id);
+                if (request is not null)
+                {
+                    request.ProcessState = "Begin Processing";
+                    request.WorkerInstance = Environment.MachineName;
 
-                await _workerResolver.ProcessAsync(request);
+                    await _requestsRepository.UpdateAsync(request);
+
+                    _logger.LogInformation("{requestId} is processing.", request.Id);
+
+                    await _workerResolver.ProcessAsync(request);
+
+                    _logger.LogInformation("{requestId} is processed.", request.Id);
+                }
+                //_logger.LogInformation("End scope.");
             }
 
         }
