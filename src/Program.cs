@@ -55,6 +55,10 @@ builder.ConfigureServices((hostContext, services) =>
 
     services.AddBrokerServicesForWorker();
 
+    // Add connectors
+    services.AddConnectorLoader();
+    services.AddConnectorDependencies();
+
     services.AddHostedService<Worker>();
 });
 
