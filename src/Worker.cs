@@ -1,9 +1,9 @@
-using OregonNexus.Broker.SharedKernel;
-using OregonNexus.Broker.Domain;
-using OregonNexus.Broker.Domain.Specifications;
-using OregonNexus.Broker.Service.Resolvers;
+using EdNexusData.Broker.SharedKernel;
+using EdNexusData.Broker.Domain;
+using EdNexusData.Broker.Domain.Specifications;
+using EdNexusData.Broker.Service.Resolvers;
 
-namespace OregonNexus.Broker.Worker;
+namespace EdNexusData.Broker.Worker;
 
 public class Worker : BackgroundService
 {

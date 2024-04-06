@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Caching.Memory;
-using OregonNexus.Broker.Data;
-using OregonNexus.Broker.SharedKernel;
-using OregonNexus.Broker.Worker;
-using OregonNexus.Broker.Worker.Services;
-using OregonNexus.Broker.Service;
+using EdNexusData.Broker.Data;
+using EdNexusData.Broker.SharedKernel;
+using EdNexusData.Broker.Worker;
+using EdNexusData.Broker.Worker.Services;
+using EdNexusData.Broker.Service;
 
 var builder = Host.CreateDefaultBuilder(args);
 
